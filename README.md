@@ -38,6 +38,44 @@ This system puts every claim in one tracker, enforces the document checklist, an
 | **Dispute** | Partial or declined claims can be disputed, one dispute per claim. The outcome is **Reversed** (the unpaid balance is recovered) or **Upheld**. Final Recovered syncs back to `Claims`. |
 | **Deadline monitor** | Daily at 8 AM, every open claim is checked for: unassigned 2+ days, filing deadline within 30 days or passed, carrier acknowledgment overdue, carrier response past 120 days. Flags are written to the sheet and posted as **one digest**, which @-mentions the manager when anything is urgent. |
 
+## Reporting dashboard
+
+Because outcomes stay on the claim row, the `Claims` table feeds straight into a **Metabase** dashboard. It's built on a sample dataset of 440 claims (Oct 1, 2025 – Oct 13, 2026) plus monthly load counts per carrier.
+
+![Dashboard overview](screenshots/overview.png)
+
+**Since automation went live on Apr 1, 2026:**
+
+| Metric (median unless noted) | Before | After |
+|---|---|---|
+| Hours to pick up a claim | 25.6 | 3.0 |
+| Days to file with the carrier | 16.9 | 3.6 |
+| Days to resolve | 103 | 62.5 |
+| Recovery rate (recovered ÷ claimed, decided claims) | 70.2% | 83.4% |
+| Carrier responses past 120 days (share of decided claims) | 19.1% | 4.5% |
+| Late filings (count) | 6 | 0 |
+
+![Before and after automation](screenshots/before-after.png)
+
+The dashboard also tracks claim volume by exception type, a carrier scorecard (claims per 100 loads hauled, recovery, late acknowledgments, response time) and dispute outcomes.
+
+![Claims per month by exception type](screenshots/volume.png)
+
+![Carrier scorecard](screenshots/carrier-scorecard.png)
+
+![Claimed vs recovered by carrier](screenshots/claimed-vs-recovered.png)
+
+![Exception types](screenshots/exception-types.png)
+
+**Selected queries** (SQLite) are in [`sql/`](sql):
+
+| File | What it shows |
+|---|---|
+| [`01_recovery_rate.sql`](sql/01_recovery_rate.sql) | Recovery rate on decided claims only |
+| [`02_before_after_days_to_file.sql`](sql/02_before_after_days_to_file.sql) | Median days to file, before vs. after automation, using window functions (SQLite has no `MEDIAN`) |
+| [`03_carrier_scorecard.sql`](sql/03_carrier_scorecard.sql) | Claims per 100 loads, recovery, late acknowledgments and median response time per carrier, using CTEs and a join to load volumes |
+| [`04_exception_types.sql`](sql/04_exception_types.sql) | Volume, value, decline rate and recovery by exception type, using conditional aggregation |
+
 ## Design choices
 
 - **Idempotent.** Every handler checks what has already happened before acting, using date stamps, destination rows and a `Notification Status` tag. Re-running a trigger never duplicates a row or a Slack post.
@@ -63,6 +101,8 @@ apps-script/
   Slack.gs       Slack posting (live or mock) + Block Kit layouts
   Utils.gs       sheet, date and money helpers
 flowchart.png    automation flowchart
+sql/             selected dashboard queries (SQLite)
+screenshots/     Metabase dashboard screenshots
 ```
 
 ## How it runs
@@ -79,7 +119,3 @@ Secrets and Slack IDs (`SLACK_BOT_TOKEN`, `CLAIMS_CHANNEL_ID`, `ESCALATION_CHANN
 ## Not included
 
 This repository shows the automation logic. The **sheet design** (tab structure, column layout, dropdowns, formatting), the **intake form builder** and the **trigger and menu setup** are my own work and are kept private, so the code here is a showcase rather than a one-click install. A walkthrough or live demo is available on request.
-
-## Roadmap
-
-- Sample dataset and Metabase dashboard: claims by carrier and exception type, $ claimed vs. recovered, recovery rate, days to resolve, deadline breaches
