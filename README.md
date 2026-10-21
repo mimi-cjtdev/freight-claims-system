@@ -38,6 +38,20 @@ This system puts every claim in one tracker, enforces the document checklist, an
 | **Dispute** | Partial or declined claims can be disputed, one dispute per claim. The outcome is **Reversed** (the unpaid balance is recovered) or **Upheld**. Final Recovered syncs back to `Claims`. |
 | **Deadline monitor** | Daily at 8 AM, every open claim is checked for: unassigned 2+ days, filing deadline within 30 days or passed, carrier acknowledgment overdue, carrier response past 120 days. Flags are written to the sheet and posted as **one digest**, which @-mentions the manager when anything is urgent. |
 
+## Slack notifications
+
+**New claim** posted to `#claims`. It's already triaged (priority, filing deadline), and a specialist takes it by reacting with their emoji.
+
+![New claim notification in Slack](screenshots/slack-new-claim.png)
+
+**Escalation** to the Claims Manager in `#claims-escalations`, with the manager's decision posted back in the thread and the claim handed back to the specialist.
+
+![Escalation alert and manager review in Slack](screenshots/slack-escalation.png)
+
+**Daily deadline check.** The monitor flags open claims that need attention, such as one nobody has taken for 2+ days.
+
+![Daily deadline digest in Slack](screenshots/slack-deadline-digest.png)
+
 ## Reporting dashboard
 
 Because outcomes stay on the claim row, the `Claims` table feeds straight into a **Metabase** dashboard. It's built on a sample dataset of 440 claims (Oct 1, 2025 – Oct 13, 2026) plus monthly load counts per carrier.
@@ -92,17 +106,16 @@ Google Sheets · Google Forms · Google Apps Script (V8) · Slack Web API (`chat
 ## Repository layout
 
 ```
-apps-script/
-  Rules.gs       business rules: thresholds, deadline clocks, document checklist, statuses
-  Intake.gs      form submission → triage → Claim ID → Slack → auto-escalation
-  Routing.gs     Slack Events endpoint (doPost) + specialist assignment
-  Workflows.gs   carrier filing, acknowledgment, escalation, decision, dispute
-  Monitor.gs     daily deadline monitor
-  Slack.gs       Slack posting (live or mock) + Block Kit layouts
-  Utils.gs       sheet, date and money helpers
+Rules.gs         business rules: thresholds, deadline clocks, document checklist, statuses
+Intake.gs        form submission → triage → Claim ID → Slack → auto-escalation
+Routing.gs       Slack Events endpoint (doPost) + specialist assignment
+Workflows.gs     carrier filing, acknowledgment, escalation, decision, dispute
+Monitor.gs       daily deadline monitor
+Slack.gs         Slack posting (live or mock) + Block Kit layouts
+Utils.gs         sheet, date and money helpers
 flowchart.png    automation flowchart
 sql/             selected dashboard queries (SQLite)
-screenshots/     Metabase dashboard screenshots
+screenshots/     Slack notification and Metabase dashboard screenshots
 ```
 
 ## How it runs

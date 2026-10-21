@@ -160,7 +160,7 @@ function disputeBlocks_(d) {
 /** Daily deadline digest for #claims. */
 function digestBlocks_(items, anyUrgent) {
   const MAX = 40;
-  const blocks = [headerBlock_('🕒 Daily deadline check · ' + plural_(items.length, 'claim') + ' need attention')];
+  const blocks = [headerBlock_('🕒 Daily deadline check · ' + plural_(items.length, 'claim') + (items.length === 1 ? ' needs' : ' need') + ' attention')];
   items.slice(0, MAX).forEach(function (it) {
     const c = it.claim;
     blocks.push(textBlock_(

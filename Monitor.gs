@@ -79,7 +79,7 @@ function runDeadlineMonitor() {
   if (items.length) {
     slackPost_({
       channel: claimsChannel_(),
-      text: '🕒 Daily deadline check: ' + plural_(items.length, 'claim') + ' need attention',
+      text: '🕒 Daily deadline check: ' + plural_(items.length, 'claim') + (items.length === 1 ? ' needs' : ' need') + ' attention',
       blocks: digestBlocks_(items, anyUrgent),
       event: 'deadline_digest',
     });
